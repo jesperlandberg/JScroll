@@ -9,9 +9,7 @@
   "author": "Jesper Landberg",
   "license": "MIT",
   "dependencies": {
-    "gsap": "^2.1.3",
-    "sniffer": "watsondg/sniffer",
-    "tiny-emitter": "^2.1.0",
+    "lodash.debounce": "^4.0.8",
     "virtual-scroll": "^1.5.1"
   }
 }

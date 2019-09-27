@@ -1,4 +1,5 @@
 import VirtualScroll from 'virtual-scroll'
+import debounce from 'lodash.debounce'
 
 export default class JScroll {
 
@@ -69,14 +70,15 @@ export default class JScroll {
 
   getSections() {
     if (!this.elems) return
+    const state = this.state
     this.sections = []
     this.elems.forEach(el => {
       el.style.transform = 'translate3d(0, 0, 0)'
 
       const speed = el.dataset.speed || 1
       const { top, bottom, height } = el.getBoundingClientRect()
-      const centering = (bounds.height / 2) - (height / 2)
-      const parallaxOffset = top < bounds.height ? 0 : ((top - centering) * speed) - (top - centering)
+      const centering = (state.vh / 2) - (height / 2)
+      const parallaxOffset = top < state.vh ? 0 : ((top - centering) * speed) - (top - centering)
       const offset = (this.current * speed) + parallaxOffset
       const section = {
         el,
@@ -169,14 +171,15 @@ export default class JScroll {
   }
 
   onResize() {
-    this.resizing = true
+    const state = this.state
+    state.resizing = true
     if (this.sections) {
       this.sections.forEach(cache => {
         const { el, rect, speed } = cache
         el.style.transform = 'translate3d(0, 0, 0)'
         const { top, bottom, height } = el.getBoundingClientRect()
-        const centering = (bounds.height / 2) - (height / 2)
-        const parallaxOffset = top < bounds.height ? 0 : ((top - centering) * speed) - (top - centering)
+        const centering = (state.vh / 2) - (height / 2)
+        const parallaxOffset = top < state.vh ? 0 : ((top - centering) * speed) - (top - centering)
         const offset = (this.current * speed) + parallaxOffset
         rect.top = top
         rect.bottom = bottom
@@ -186,12 +189,12 @@ export default class JScroll {
       this.transformSections()
     }
     this.clampTarget()
-    this.resizing = false
+    state.resizing = false
   }
 
   on() {
     this.vs.on(this.onEvent)
-    window.addEventListener('resize', this.onResize)
+    window.addEventListener('resize', debounce(this.onResize, 200))
     if (!this.opts.useOwnRaf) {
       this.requestRaf()
     }
@@ -200,7 +203,7 @@ export default class JScroll {
   off() {
     this.vs.off(this.onEvent)
     this.vs.destroy()
-    window.removeEventListener('resize', this.onResize)
+    window.removeEventListener('resize', debounce(this.onResize, 200))
     if (!this.opts.useOwnRaf) {
       this.cancelRaf()
     }    
