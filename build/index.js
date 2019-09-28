@@ -74,20 +74,17 @@ export default class JScroll {
       const speed = el.dataset.speed || 1
       const { top, bottom, height } = el.getBoundingClientRect()
       const centering = (store.wh / 2) - (height / 2)
-      const parallaxOffset = top < store.wh ? 0 : ((top - centering) * speed) - (top - centering)
-      const offset = (this.state.currentRounded * speed) + parallaxOffset
-      const section = {
-        el,
-        rect: {
-          top,
-          bottom
-        },
-        offset, parallaxOffset,
-        speed,
-        out: true,
-      }
+      const offset = top < store.wh ? 0 : ((top - centering) * speed) - (top - centering)
 
-      this.sections.push(section)
+      this.sections.push({
+        el,
+        bounds: {
+          top, bottom,
+          offset,
+        },
+        speed,
+        out: true
+      })
     })
   }
 
@@ -118,12 +115,8 @@ export default class JScroll {
 
     for (let i = 0; i < total; i++) {
       const section = this.sections[i]
-      const { 
-        el, rect, speed, offset, parallaxOffset 
-      } = section
-      const { isVisible, transform } = this.isVisible(
-        rect, offset, parallaxOffset, speed
-      )
+      const { el, bounds, speed } = section
+      const { isVisible, transform } = this.isVisible(bounds, speed)
 
       if (isVisible || this.state.resizing) {
         section.out = false
@@ -140,14 +133,15 @@ export default class JScroll {
   }
 
   isVisible(
-    { top, bottom },
-    offset = 0,
-    parallaxOffset = 0,
+    {
+      top, bottom,
+      offset = 0
+    },
     speed = 1
   ) {
     const threshold = this.options.threshold
     const translate = this.state.currentRounded * speed
-    const transform = translate - parallaxOffset
+    const transform = translate - offset
     const start = (top + offset) - translate
     const end = (bottom + offset) - translate
     const isVisible = start < (threshold + store.wh) && end > -threshold
@@ -171,28 +165,34 @@ export default class JScroll {
   onResize() {
     const state = this.state
     state.resizing = true
+    store.wh = window.innerHeight
+
     if (this.sections) {
-      this.sections.forEach(cache => {
-        const { el, rect, speed } = cache
+      this.sections.forEach(section => {
+        const { el, bounds, speed } = section
 
         el.style.transform = 'translate3d(0, 0, 0)'
 
         const { top, bottom, height } = el.getBoundingClientRect()
-        const centering = (state.vh / 2) - (height / 2)
-        const parallaxOffset = top < state.vh ? 0 : ((top - centering) * speed) - (top - centering)
-        const offset = (this.state.currentRounded * speed) + parallaxOffset
+        const centering = (store.wh / 2) - (height / 2)
+        const offset = top < store.wh ? 0 : ((top - centering) * speed) - (top - centering)
 
-        rect.top = top
-        rect.bottom = bottom
-        cache.parallaxOffset = parallaxOffset
-        cache.offset = offset
+        Object.assign(bounds, {
+          top, bottom, 
+          offset
+        })
       })
+
       this.transformSections()
     }
+
+    this.setBounding()
     this.clampTarget()
+
     if (this.scrollbar) {
       this.scrollbar.onResize()
     }
+
     state.resizing = false
   }
 

@@ -6,7 +6,7 @@ export default class Scrollbar {
   constructor(context) {
     this.context = context
 
-    bindAll(this, 'onClick', 'onDown', 'onMove', 'onUp', 'onResize')
+    bindAll(this, 'onClick', 'onDown', 'onMove', 'onUp')
 
     this.el = null
     this.handle = null

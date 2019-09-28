@@ -2,4 +2,5 @@
 .cache
 node_modules
 dist/
+src/
 yarn.lock
