@@ -2,7 +2,7 @@
   "name": "@twotwentytwo/j",
   "version": "1.0.5",
   "description": "",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,5 +11,8 @@
   "dependencies": {
     "lodash.debounce": "^4.0.8",
     "virtual-scroll": "^1.5.1"
+  },
+  "devDependencies": {
+    "sass": "^1.22.12"
   }
 }

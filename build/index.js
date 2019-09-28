@@ -1,26 +1,30 @@
 import VirtualScroll from 'virtual-scroll'
 import debounce from 'lodash.debounce'
+import store from './store.js'
+import bindAll from './utils/bindAll.js'
+import Scrollbar from './components/Scrollbar.js'
 
 export default class JScroll {
 
   constructor(opts = {}) {
-    this.bindAll('tick', 'onEvent', 'onResize')
+    bindAll(this, 'tick', 'onEvent', 'onResize')
 
-    this.opts = {
-      el = document.querySelector('.js-smooth-sections'),
-      elems = document.querySelectorAll('.js-smooth-section'),
-      ease = 0.1,
-      useOwnRaf = false,
-      threshold = 100,
-      mouseMultiplier = 0.45,
-      touchMultiplier = 2.5,
-      firefoxMultiplier = 90,
-      passive = true,
-      limitInertia = false
-    } = opts
+    this.opts = opts
 
-    this.el = this.opts.el
-    this.elems = this.opts.elems
+    this.el = this.opts.el || document.querySelector('.js-smooth')
+    this.elems = this.opts.elems || document.querySelectorAll('.js-smooth-section')
+
+    this.options = {
+      ease: this.opts.ease || 0.1,
+      useRaf: this.opts.useRaf || true,
+      scrollbar: this.opts.scrollbar || false,
+      threshold: this.opts.threshold || 100,
+      mouseMultiplier: this.opts.mouseMultiplier || 0.45,
+      touchMultiplier: this.opts.touchMultiplier || 2.5,
+      firefoxMultiplier: this.opts.firefoxMultiplier ||  90,
+      passive: this.opts.passive || true,
+      limitInertia: this.opts.limitInertia || false
+    }
 
     this.state = {
       target: 0,
@@ -28,61 +32,56 @@ export default class JScroll {
       currentRounded: 0,
       bounding: 0,
       resizing: false,
-      vh: window.innerHeight
     }
 
     this.sections = null
     this.raf = null
 
     this.vs = new VirtualScroll({
-      limitInertia: this.opts.limitInertia,
-      mouseMultiplier: this.opts.mouseMultiplier,
-      touchMultiplier: this.opts.touchMultiplier,
-      firefoxMultiplier: this.opts.firefoxMultiplier,
-      passive: this.opts.passive
+      limitInertia: this.options.limitInertia,
+      mouseMultiplier: this.options.mouseMultiplier,
+      touchMultiplier: this.options.touchMultiplier,
+      firefoxMultiplier: this.options.firefoxMultiplier,
+      passive: this.options.passive
     })
-  }
 
-  bindAll() {
-    const funcs = [].slice.call(arguments, 0)
-    funcs.forEacH(func => this[func] = this[func].bind(this))
+    this.init()
   }
 
   setStyles() {
-    const el = this.el
-    const body = document.body
+    Object.assign(this.el.style, {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%'
+    })
 
-    el.style.position = 'fixed'
-    el.style.top = 0
-    el.style.left = 0
-    el.style.width = '100%'
-
-    body.style.overflow = 'hidden'
-    body.classList.add('is-virtual-scroll')
+    store.body.style.overflow = 'hidden'
+    store.body.classList.add('is-virtual-scroll')
   }
 
   setBounding() {
-    const vh = window.innerHeight
     const height = this.el.getBoundingClientRect().height
-    
-    this.state.bounding = height >= vh ? height - vh : height
+    this.state.bounding = height >= store.wh ? height - store.wh : height
   }
 
   getSections() {
     if (!this.elems) return
-    const state = this.state
     this.sections = []
     this.elems.forEach(el => {
       el.style.transform = 'translate3d(0, 0, 0)'
 
       const speed = el.dataset.speed || 1
       const { top, bottom, height } = el.getBoundingClientRect()
-      const centering = (state.vh / 2) - (height / 2)
-      const parallaxOffset = top < state.vh ? 0 : ((top - centering) * speed) - (top - centering)
-      const offset = (this.current * speed) + parallaxOffset
+      const centering = (store.wh / 2) - (height / 2)
+      const parallaxOffset = top < store.wh ? 0 : ((top - centering) * speed) - (top - centering)
+      const offset = (this.state.currentRounded * speed) + parallaxOffset
       const section = {
         el,
-        top, bottom,
+        rect: {
+          top,
+          bottom
+        },
         offset, parallaxOffset,
         speed,
         out: true,
@@ -94,11 +93,14 @@ export default class JScroll {
 
   tick() {
     const state = this.state
-    const { ease, useOwnRaf } = this.opts
+    const { ease, useRaf } = this.options
     state.current += (state.target - state.current) * ease
     state.currentRounded = Math.round(state.current * 100) / 100
     this.transformSections()
-    if (!useOwnRaf) {
+    if (this.scrollbar) {
+      this.scrollbar.transform(state.currentRounded)
+    }
+    if (useRaf) {
       this.requestRaf()
     }
   }
@@ -117,13 +119,10 @@ export default class JScroll {
     for (let i = 0; i < total; i++) {
       const section = this.sections[i]
       const { 
-        el, 
-        top, bottom, 
-        speed, offset, parallaxOffset 
+        el, rect, speed, offset, parallaxOffset 
       } = section
-      const { isVisible, transform } = visible(
-        top, bottom,
-        parallaxOffset, offset, speed
+      const { isVisible, transform } = this.isVisible(
+        rect, offset, parallaxOffset, speed
       )
 
       if (isVisible || this.state.resizing) {
@@ -141,18 +140,17 @@ export default class JScroll {
   }
 
   isVisible(
-    top, bottom,
+    { top, bottom },
     offset = 0,
     parallaxOffset = 0,
     speed = 1
   ) {
-    const { vh, currentRounded, threshold } = this.state
-    const translate = currentRounded * speed
+    const threshold = this.options.threshold
+    const translate = this.state.currentRounded * speed
     const transform = translate - parallaxOffset
     const start = (top + offset) - translate
     const end = (bottom + offset) - translate
-    const isVisible = start < (threshold + vh) && end > -threshold
-
+    const isVisible = start < (threshold + store.wh) && end > -threshold
     return {
       isVisible,
       transform,
@@ -176,11 +174,14 @@ export default class JScroll {
     if (this.sections) {
       this.sections.forEach(cache => {
         const { el, rect, speed } = cache
+
         el.style.transform = 'translate3d(0, 0, 0)'
+
         const { top, bottom, height } = el.getBoundingClientRect()
         const centering = (state.vh / 2) - (height / 2)
         const parallaxOffset = top < state.vh ? 0 : ((top - centering) * speed) - (top - centering)
-        const offset = (this.current * speed) + parallaxOffset
+        const offset = (this.state.currentRounded * speed) + parallaxOffset
+
         rect.top = top
         rect.bottom = bottom
         cache.parallaxOffset = parallaxOffset
@@ -189,14 +190,21 @@ export default class JScroll {
       this.transformSections()
     }
     this.clampTarget()
+    if (this.scrollbar) {
+      this.scrollbar.onResize()
+    }
     state.resizing = false
   }
 
   on() {
+    const { useRaf, scrollbar } = this.options
     this.vs.on(this.onEvent)
     window.addEventListener('resize', debounce(this.onResize, 200))
-    if (!this.opts.useOwnRaf) {
+    if (useRaf) {
       this.requestRaf()
+    }
+    if (scrollbar) {
+      this.scrollbar = new Scrollbar(this)
     }
   }
 
@@ -204,9 +212,12 @@ export default class JScroll {
     this.vs.off(this.onEvent)
     this.vs.destroy()
     window.removeEventListener('resize', debounce(this.onResize, 200))
-    if (!this.opts.useOwnRaf) {
+    if (this.raf) {
       this.cancelRaf()
-    }    
+    }
+    if (this.scrollbar) {
+      this.scrollbar.destroy()
+    }
   }
 
   destroy() {
@@ -221,6 +232,7 @@ export default class JScroll {
   init() {
     this.setStyles()
     this.setBounding()
+    this.getSections()
     this.on()
   }
 }
