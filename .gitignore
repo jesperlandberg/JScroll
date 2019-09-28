@@ -1,6 +1,7 @@
 .DS_Store
 .cache
 node_modules
-dist/
-src/
+dist
+src
 yarn.lock
+index.html
