@@ -6,7 +6,7 @@ Smooth scrolling sections based on <a href="http://www.everyday3d.com/blog/index
 
 `yarn add jscroll`
 
-```
+```Javascript
 import JScroll from 'jscroll'
 
 JScroll.init({ // Options is optional })
