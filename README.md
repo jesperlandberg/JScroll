@@ -20,3 +20,10 @@ JScroll.init({ // Options is optional })
   - `mouseMultiplier`: defaults to 0.45
   - `touchMultiplier`: defaults to 2.5
   - `firefoxMultiplier`: defaults to 90
+  
+## Methods
+`JScroll.init()` Initialise instance
+`JScroll.update()` Update the instance
+`JScroll.resize()` Trigger resize
+`JScroll.stop()` Stop scrolling
+`JScroll.resume()` Resume scrolling
