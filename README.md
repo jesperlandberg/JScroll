@@ -23,7 +23,9 @@ JScroll.init({ // Options is optional })
   
 ## Methods
 `JScroll.init()` Initialise instance
+
 `JScroll.update()` Update the instance
+
 `JScroll.resize()` Trigger resize
 `JScroll.stop()` Stop scrolling
 `JScroll.resume()` Resume scrolling
