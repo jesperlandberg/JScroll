@@ -9,7 +9,5 @@ Smooth scrolling sections based on <a href="http://www.everyday3d.com/blog/index
 ```
 import JScroll from 'jscroll'
 
-JScroll.init( /* Optional */ {
- // Options here
-} /**/ )
+JScroll.init({ // Options is optional })
 ```
