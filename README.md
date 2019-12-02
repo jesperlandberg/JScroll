@@ -46,9 +46,9 @@ JScroll.init({ // Options is optional })
 
 ## Events
 
-`on('tick', ({ target, current })`: Raf callback. Passes scroll and lerped scroll values as params.
+`on('tick', ({ target, current })`: Raf callback. Scroll and lerped scroll params.
 
-`on('scroll', ({ delta, target })`: Scroll callback. Passes delta and scroll values.
+`on('scroll', ({ delta, target })`: Scroll callback. Delta and scroll params.
 
 ## Getters
 `getSmooth`: Returns lerped scroll value
