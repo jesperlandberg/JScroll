@@ -17,5 +17,5 @@ JScroll.init({ // Options is optional })
 - `scrollbar`: virtual scrollbar (defaults to `false`)
 - `disableMobile`: disable JScroll from mobil devices (defaults to `true`)
 - `vs`: {
- - `mouseMultiplier`: defaults to 0.45
+  - `mouseMultiplier`: defaults to 0.45
 }
