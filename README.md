@@ -18,4 +18,6 @@ JScroll.init({ // Options is optional })
 - `disableMobile`: disable JScroll from mobil devices (defaults to `true`)
 - `vs`: {
   - `mouseMultiplier`: defaults to 0.45
+  - `touchMultiplier`: defaults to 2.5
+  - `firefoxMultiplier`: defaults to 90
 }
