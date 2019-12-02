@@ -27,5 +27,23 @@ JScroll.init({ // Options is optional })
 `JScroll.update()` Update the instance
 
 `JScroll.resize()` Trigger resize
+
 `JScroll.stop()` Stop scrolling
+
 `JScroll.resume()` Resume scrolling
+
+`JScroll.destroy()` Destroy and clean instance
+
+`JScroll.scrollTo(someElement.offsetTop)`
+
+## Events
+
+`JScroll.on('tick', ({ target, current })`: Raf callback. Passes scroll and lerped scroll values as params.
+
+`JScroll.on('scroll', ({ delta, target })`: Scroll callback. Passes delta and scroll values.
+
+## Getters
+`JScroll.getSmooth`: Returns lerped scroll value
+
+`JScroll.getScroll`: Returns scroll value
+
