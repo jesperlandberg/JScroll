@@ -4,12 +4,17 @@ Smooth scrolling sections based on <a href="http://www.everyday3d.com/blog/index
 
 ## Usage
 
+###### Install
 `yarn add @twotwentytwo/jscroll`
 
+###### Javascript
 ```Javascript
 import JScroll from '@twotwentytwo/jscroll'
 
 JScroll.init({ // Options is optional })
+```
+###### Markup
+```HTML
 ```
 
 ## Options
