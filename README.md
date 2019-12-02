@@ -30,28 +30,28 @@ JScroll.init({ // Options is optional })
   - `firefoxMultiplier`: Defaults to 90
   
 ## Methods
-`JScroll.init()` Initialise instance
+`init()` Initialise instance
 
-`JScroll.update()` Update instance
+`update()` Update instance
 
-`JScroll.resize()` Trigger resize
+`resize()` Trigger resize
 
-`JScroll.stop()` Stop scrolling
+`stop()` Stop scrolling
 
-`JScroll.resume()` Resume scrolling
+`resume()` Resume scrolling
 
-`JScroll.destroy()` Destroy and clean instance
+`destroy()` Destroy and clean instance
 
-`JScroll.scrollTo(someElement.offsetTop)`
+`scrollTo(someElement.offsetTop)`
 
 ## Events
 
-`JScroll.on('tick', ({ target, current })`: Raf callback. Passes scroll and lerped scroll values as params.
+`on('tick', ({ target, current })`: Raf callback. Passes scroll and lerped scroll values as params.
 
-`JScroll.on('scroll', ({ delta, target })`: Scroll callback. Passes delta and scroll values.
+`on('scroll', ({ delta, target })`: Scroll callback. Passes delta and scroll values.
 
 ## Getters
-`JScroll.getSmooth`: Returns lerped scroll value
+`getSmooth`: Returns lerped scroll value
 
-`JScroll.getScroll`: Returns scroll value
+`getScroll`: Returns scroll value
 
