@@ -1,58 +1,64 @@
 import VirtualScroll from 'virtual-scroll'
 import debounce from 'lodash.debounce'
-import store from './store.js'
-import bindAll from './utils/bindAll.js'
-import Scrollbar from './components/Scrollbar.js'
 
-export default class JScroll {
+import store from './store'
+import { options } from './options'
+import { Scrollbar } from './components'
+import { Events, detect } from './utils'
 
-  constructor(opts = {}) {
-    bindAll(this, 'tick', 'onEvent', 'onResize')
+export default new class {
 
-    this.opts = opts
-
-    this.el = this.opts.el || document.querySelector('.js-smooth')
-    this.elems = this.opts.elems || document.querySelectorAll('.js-smooth-section')
-
-    this.options = {
-      ease: this.opts.ease || 0.1,
-      useRaf: this.opts.useRaf || true,
-      scrollbar: this.opts.scrollbar || false,
-      threshold: this.opts.threshold || 100,
-      mouseMultiplier: this.opts.mouseMultiplier || 0.45,
-      touchMultiplier: this.opts.touchMultiplier || 2.5,
-      firefoxMultiplier: this.opts.firefoxMultiplier ||  90,
-      passive: this.opts.passive || true,
-      limitInertia: this.opts.limitInertia || false
-    }
-
+  constructor() {
     this.state = {
       target: 0,
       current: 0,
       currentRounded: 0,
-      bounding: 0,
+      scrollLimit: 0,
       resizing: false,
+      initialised: false,
+      stopped: true
     }
 
-    this.sections = null
+    this.sections = []
     this.raf = null
+  }
 
+  init(opts = {}) {
+    Object.assign(opts, options)
+
+    const {
+      el, elems,
+      vs,
+      disableMobile
+    } = options
+
+    if (detect.device && disableMobile) return
+
+    this.el = el || document.querySelector('[data-smooth]')
+    this.elems = elems || document.querySelectorAll('[data-smooth-item]')
+
+    // Initalise Virtual Scroll
     this.vs = new VirtualScroll({
-      limitInertia: this.options.limitInertia,
-      mouseMultiplier: this.options.mouseMultiplier,
-      touchMultiplier: this.options.touchMultiplier,
-      firefoxMultiplier: this.options.firefoxMultiplier,
-      passive: this.options.passive
+      limitInertia: vs.limitInertia,
+      mouseMultiplier: vs.mouseMultiplier,
+      touchMultiplier: vs.touchMultiplier,
+      firefoxMultiplier:vs.firefoxMultiplier,
+      passive: vs.passive
     })
 
-    this.init()
+    this.setStyles()
+    this.setScrollLimit()
+    this.cacheSections()
+    this.addEvents()
+
+    this.state.initialised = true
+    this.state.stopped = false
   }
 
   setStyles() {
     Object.assign(this.el.style, {
       position: 'fixed',
-      top: 0,
-      left: 0,
+      top: 0, left: 0,
       width: '100%'
     })
 
@@ -60,46 +66,115 @@ export default class JScroll {
     store.body.classList.add('is-virtual-scroll')
   }
 
-  setBounding() {
+  setScrollLimit() {
+    const { wh } = store
     const height = this.el.getBoundingClientRect().height
-    this.state.bounding = height >= store.wh ? height - store.wh : height
+    this.state.scrollLimit = height >= wh ? height - wh : height
   }
 
-  getSections() {
+  cacheSections() {
     if (!this.elems) return
-    this.sections = []
-    this.elems.forEach(el => {
-      el.style.transform = 'translate3d(0, 0, 0)'
 
-      const speed = el.dataset.speed || 1
-      const { top, bottom, height } = el.getBoundingClientRect()
-      const centering = (store.wh / 2) - (height / 2)
-      const offset = top < store.wh ? 0 : ((top - centering) * speed) - (top - centering)
+    for (let i = 0; i < this.elems.length; i++) {
+      const el = this.elems[i]
+      const { speed, top, bottom, offset } = this.getVars(el)
 
       this.sections.push({
         el,
-        bounds: {
-          top, bottom,
-          offset,
-        },
-        speed,
-        out: true
+        top, bottom,
+        offset, speed,
+        out: true,          
       })
-    })
+
+      Object.assign(el.style, {
+        willChange: 'transform',
+        transform: 'translateY(0)'
+      })
+    }
   }
 
-  tick() {
-    const state = this.state
-    const { ease, useRaf } = this.options
-    state.current += (state.target - state.current) * ease
-    state.currentRounded = Math.round(state.current * 100) / 100
+  updateSections() {
+    if (!this.sections) return
+
+    for (let i = 0; i < this.sections.length; i++) {
+      const section = this.sections[i]
+
+      section.el.style.transform = 'translateY(0)'
+      
+      const { top, bottom, offset } = this.getVars(section.el)
+
+      Object.assign(section, {
+        top, bottom,
+        offset
+      })     
+    }
+
     this.transformSections()
-    if (this.scrollbar) {
-      this.scrollbar.transform(state.currentRounded)
+  }
+
+  getVars(el) {
+    const speed = el.dataset.speed || 1
+    const { top, bottom, height } = el.getBoundingClientRect()
+    const centering = (store.wh / 2) - (height / 2)
+    const offset = top < store.wh ? 0 : ((top - centering) * speed) - (top - centering)
+
+    return {
+      speed,
+      top, bottom,
+      offset
     }
-    if (useRaf) {
-      this.requestRaf()
+  }
+
+  addEvents() {
+    this.vs.on(this.scroll)
+
+    window.addEventListener('resize', debounce(this.resize, 200))
+
+    if (options.scrollbar) (this.scrollbar = new Scrollbar(this))
+
+    // Call requestAnimationFrame first time
+    this.requestRaf()
+  }
+
+  tick = () => {
+    const state = this.state
+    
+    if (!state.stopped) {
+      state.current += (state.target - state.current) * options.ease
+      state.currentRounded = Math.round(state.current * 100) / 100
+
+      this.transformSections()
     }
+
+    // Emit tick event and scroll values (lerped and non-lerped)
+    Events.emit('tick', {
+      target: state.target,
+      current: state.currentRounded
+    })
+
+    this.requestRaf()
+  }
+
+  on(event, cb) {
+    return Events.on(event, cb)
+  }
+
+  // Returns the current lerped scroll
+  get getSmooth() {
+    return this.state.currentRounded
+  }
+
+  // Returns the current scroll
+  get getScroll() {
+    return this.state.target
+  }
+
+  stop() {
+    this.state.stopped = true
+  }
+  
+  start() {
+    this.state.stopped = false
   }
 
   requestRaf() {
@@ -107,16 +182,24 @@ export default class JScroll {
   }
 
   cancelRaf() {
-    cancelAnimationFrame(this.raf)
+    this.raf && cancelAnimationFrame(this.raf)
   }
 
   transformSections() {
-    const total = this.sections.length
-
-    for (let i = 0; i < total; i++) {
+    for (let i = 0; i < this.sections.length; i++) {
       const section = this.sections[i]
-      const { el, bounds, speed } = section
-      const { isVisible, transform } = this.isVisible(bounds, speed)
+
+      const { 
+        el, 
+        top, bottom, 
+        offset, 
+        speed 
+      } = section
+
+      const { 
+        isVisible, 
+        transform 
+      } = this.isVisible(top, bottom, offset, speed)
 
       if (isVisible || this.state.resizing) {
         section.out = false
@@ -129,22 +212,21 @@ export default class JScroll {
   }
 
   translate(transform) {
-    return `translate3d(0, ${-transform}px, 0)`
+    return `translateY(${-transform}px)`
   }
 
   isVisible(
-    {
-      top, bottom,
-      offset = 0
-    },
+    top, bottom,
+    offset = 0,
     speed = 1
   ) {
-    const threshold = this.options.threshold
+    const threshold = options.threshold
     const translate = this.state.currentRounded * speed
     const transform = translate - offset
     const start = (top + offset) - translate
     const end = (bottom + offset) - translate
     const isVisible = start < (threshold + store.wh) && end > -threshold
+
     return {
       isVisible,
       transform,
@@ -153,88 +235,73 @@ export default class JScroll {
 
   clampTarget() {
     const state = this.state
-    state.target = Math.min(Math.max(state.target, -0), state.bounding)
+    state.target = Math.min(Math.max(state.target, -0), state.scrollLimit)
   }
 
-  onEvent(e) {
-    const delta = e.deltaY * -1
-    this.state.target += delta
+  scroll = ({ deltaY }) => {
+    const state = this.state
+
+    if (state.stopped) return
+
+    const delta = deltaY * -1
+
+    state.target += delta
     this.clampTarget()
+
+    // Emit scroll event
+    Events.emit('scroll', { 
+      delta,
+      target: state.target
+    })
   }
 
-  onResize() {
+  resize = () => {
     const state = this.state
     state.resizing = true
+
     store.wh = window.innerHeight
 
-    if (this.sections) {
-      this.sections.forEach(section => {
-        const { el, bounds, speed } = section
-
-        el.style.transform = 'translate3d(0, 0, 0)'
-
-        const { top, bottom, height } = el.getBoundingClientRect()
-        const centering = (store.wh / 2) - (height / 2)
-        const offset = top < store.wh ? 0 : ((top - centering) * speed) - (top - centering)
-
-        Object.assign(bounds, {
-          top, bottom, 
-          offset
-        })
-      })
-
-      this.transformSections()
-    }
-
-    this.setBounding()
+    this.updateSections()
+    this.setScrollLimit()
     this.clampTarget()
 
-    if (this.scrollbar) {
-      this.scrollbar.onResize()
-    }
+    Events.emit('resize')
 
     state.resizing = false
   }
 
-  on() {
-    const { useRaf, scrollbar } = this.options
-    this.vs.on(this.onEvent)
-    window.addEventListener('resize', debounce(this.onResize, 200))
-    if (useRaf) {
-      this.requestRaf()
-    }
-    if (scrollbar) {
-      this.scrollbar = new Scrollbar(this)
-    }
+  scrollTo(offset) {
+    this.state.target = offset
   }
 
-  off() {
-    this.vs.off(this.onEvent)
+  update(elems) {
+    this.elems = this.sections = null
+    this.elems = elems || document.querySelectorAll('[data-smooth-item]')
+
+    this.cacheSections()
+    this.setScrollLimit()
+
+    if (this.scrollbar) this.scrollbar.update()
+  }
+
+  removeEvents() {
+    this.vs.off(this.scroll)
     this.vs.destroy()
-    window.removeEventListener('resize', debounce(this.onResize, 200))
-    if (this.raf) {
-      this.cancelRaf()
-    }
-    if (this.scrollbar) {
-      this.scrollbar.destroy()
-    }
+
+    window.removeEventListener('resize', debounce(this.resize, 200))
+
+    this.cancelRaf()
+
+    if (this.scrollbar) this.scrollbar.destroy()
   }
 
   destroy() {
-    this.off()
+    this.removeEvents()
+
     this.state = null
     this.opts = null
     this.sections = null
     this.elems = null
     this.el = null
   }
-
-  init() {
-    this.setStyles()
-    this.setBounding()
-    this.getSections()
-    this.on()
-  }
 }
-
-window.JScroll = JScroll

@@ -1,58 +1,74 @@
-import store from '../store.js'
-import bindAll from '../utils/bindAll.js'
+import store from '../store'
+import { Events } from '../utils'
 
-export default class Scrollbar {
+export default class {
 
   constructor(context) {
     this.context = context
-
-    bindAll(this, 'onClick', 'onDown', 'onMove', 'onUp')
-
+  
     this.el = null
     this.handle = null
 
-    this.isClicked = false
-    this.scale = 0
+    this.state = {
+      clicked: false,
+      scale: 0
+    }
 
     this.init()
   }
 
+  init() {
+    this.create()
+    this.setBounds()
+    this.addEvents()
+  }
+
+  addEvents() {
+    Events.on('tick', this.transform)
+    Events.on('resize', this.resize)
+
+    this.el.addEventListener('click', this.click)
+    this.handle.addEventListener('mousedown', this.down)
+
+    window.addEventListener('mousemove', this.move)
+    window.addEventListener('mouseup', this.up)
+  }
+
   setBounds() {
-    this.scale = (this.context.state.bounding + store.wh) / store.wh
-    const height = store.wh / this.scale
-    this.handle.style.height = `${height}px`   
+    this.state.scale = (this.context.state.scrollLimit + store.wh) / store.wh
+    this.handle.style.height = `${store.wh / this.state.scale}px`   
   }
 
-  transform(current) {
-    const transform = current / this.scale
-    this.handle.style.transform = `translate3d(0, ${transform}px, 0)`
+  transform = ({ current }) => {
+    this.handle.style.transform = `translate3d(0, ${current / this.state.scale}px, 0)`
   }
 
-  onClick(e) {
+  click = (e) => {
     this.calcScroll(e)
   }
 
-  onDown() {
-    this.isClicked = true
+  down = () => {
+    this.state.clicked = true
     store.body.classList.add('is-dragging')
   }
 
-  onMove(e) {
-    if (!this.isClicked) return
+  move = (e) => {
+    if (!this.state.clicked) return
     this.calcScroll(e)
   }
 
-  onUp() {
-    this.isClicked = false
+  up = () => {
+    this.state.clicked = false
     store.body.classList.remove('is-dragging')
   }
 
-  onResize() {
+  resize = () => {
     this.setBounds()
   }
 
   calcScroll(e) {
-    const delta = e.clientY * this.scale
+    const delta = e.clientY * this.state.scale
+
     this.context.state.target = delta
     this.context.clampTarget()
   }
@@ -61,21 +77,19 @@ export default class Scrollbar {
     this.el = document.createElement('div')
     this.handle = document.createElement('div')
 
-    this.el.classList.add('c-scrollbar', 'js-scrollbar')
-    this.handle.classList.add('c-scrollbar__handle', 'js-scrollbar__handle')
+    this.el.classList.add('scrollbar', 'js-scrollbar')
+    this.handle.classList.add('scrollbar__handle', 'js-scrollbar__handle')
 
     Object.assign(this.el.style, {
       position: 'fixed',
-      top: 0,
-      right: 0,
+      top: 0, right: 0,
       height: '100%',
       pointerEvents: 'all'
     })
 
     Object.assign(this.handle.style, {
       position: 'absolute',
-      top: 0,
-      right: 0,
+      top: 0, left: 0,
       width: '100%',
       cursor: 'pointer'
     })
@@ -84,23 +98,19 @@ export default class Scrollbar {
     this.el.appendChild(this.handle)
   }
 
-  on() {
-    this.el.addEventListener('click', this.onClick)
-    this.handle.addEventListener('mousedown', this.onDown)
-    window.addEventListener('mousemove', this.onMove)
-    window.addEventListener('mouseup', this.onUp)
-  }
-
-  off() {
-    this.el.removeEventListener('click', this.onClick)
-    this.handle.removeEventListener('mousedown', this.onDown)
-    window.removeEventListener('mousemove', this.onMove)
-    window.removeEventListener('mouseup', this.onUp)
-  }
-
-  init() {
-    this.create()
+  update() {
     this.setBounds()
-    this.on()
+  }
+
+  removeEvents() {
+    this.el.removeEventListener('click', this.click)
+    this.handle.removeEventListener('mousedown', this.down)
+
+    window.removeEventListener('mousemove', this.move)
+    window.removeEventListener('mouseup', this.up)
+  }
+
+  destroy() {
+    this.removeEvents()
   }
 }
