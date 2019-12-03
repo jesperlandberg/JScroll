@@ -50,7 +50,7 @@ JScroll.init({ // Options are optional })
 
 `resume()` Resume scrolling
 
-`destroy()` Destroy and clean instance
+`destroy()` Clean instance
 
 `scrollTo(someElement.offsetTop)`
 
