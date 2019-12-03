@@ -32,7 +32,7 @@ JScroll.init({ // Options are optional })
 
 `scrollbar`: Virtual scrollbar (defaults to `false`)
 
-`disableMobile`: Disable JScroll on mobilee devices (defaults to `true`)
+`disableMobile`: Disable JScroll on mobile devices (defaults to `true`)
 
 `preload`: Trigger resize after loading all images (defaults to `false`)
 
