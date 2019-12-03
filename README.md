@@ -19,7 +19,6 @@ JScroll.init({ // Options is optional })
   <div data-smooth-item></div>
   <div data-smooth-item></div>
   <div data-smooth-item></div>
-  
   <div>
     <div>
       <div data-smooth-item></div> <!-- No need to be top lvl -->
