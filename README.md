@@ -15,7 +15,7 @@ JScroll.init({ // Options are optional })
 ```
 ###### Markup
 ```HTML
-<div data-smooth> <!-- Add data-smooth to ur containeer -->
+<div data-smooth> <!-- Add data-smooth to your container -->
   <div data-smooth-item></div>
   <div data-smooth-item></div>
   <div data-smooth-item data-speed="1.1"></div> <!-- Use data-speed to control speed of item -->
@@ -60,9 +60,9 @@ JScroll.init({ // Options are optional })
 
 ## Events
 
-`on('tick', ({ target, current })`: Raf callback. Scroll and lerped scroll params.
+`on('tick', ({ target, current }) => {})`: Raf callback. Scroll and lerped scroll params.
 
-`on('scroll', ({ delta, target })`: Scroll callback. Delta and scroll params.
+`on('scroll', ({ delta, target }) => {})`: Scroll callback. Delta and scroll params.
 
 ## Getters
 `getSmooth`: Returns lerped scroll value
