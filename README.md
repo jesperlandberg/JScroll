@@ -40,19 +40,21 @@ JScroll.init({ // Options are optional })
   - `firefoxMultiplier`: Defaults to 90
   
 ## Methods
-`init()` Initialise instance
+`init()`: Initialise instance
 
-`update()` Update instance
+`update()`: Update instance
 
-`resize()` Trigger resize
+`resize()`: Trigger resize
 
-`stop()` Stop scrolling
+`preload()`: Preload images
 
-`resume()` Resume scrolling
+`stop()`: Stop scrolling
 
-`destroy()` Clean instance
+`resume()`: Resume scrolling
 
-`scrollTo(someElement.offsetTop)`
+`destroy()`: Clean instance
+
+`scrollTo(someElement.offsetTop)`: Anchor scroll
 
 ## Events
 
