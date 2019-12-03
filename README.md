@@ -73,6 +73,7 @@ JScroll.init({ // Options are optional })
 
 Some great examples of sites using JScroll.
 
-<a href="https://www.crrtt.com/" target="_blank">Fabio Caretti Portfolio</a>
+<a href="https://www.crrtt.com/" target="_blank">Fabio Caretti</a>
+
 <a href="https://discoverylandco.com" target="_blank">Discoverylandco</a>
 
