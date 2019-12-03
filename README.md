@@ -15,6 +15,17 @@ JScroll.init({ // Options is optional })
 ```
 ###### Markup
 ```HTML
+<div data-smooth> <!-- Add data-smooth to ur containeer -->
+  <div data-smooth-item></div>
+  <div data-smooth-item></div>
+  <div data-smooth-item></div>
+  
+  <div>
+    <div>
+      <div data-smooth-item></div> <!-- No need to be top lvl -->
+    </div>
+  </div>
+</div>
 ```
 
 ## Options
