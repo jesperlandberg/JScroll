@@ -1,6 +1,7 @@
-export const options = {
+export default {
   ease: 0.1,
   scrollbar: false,
+  preload: false,
   threshold: 100,
   disableMobile: true,
   vs: {

@@ -2,7 +2,11 @@ import VirtualScroll from 'virtual-scroll'
 import debounce from 'lodash.debounce'
 
 import store from './store'
-import { Events, detect } from '../utils'
+import { 
+  Events, 
+  detect, 
+  preload 
+} from '../utils'
 
 import { options } from './options'
 import Scrollbar from './Scrollbar'
@@ -52,6 +56,8 @@ export default class {
     this.setScrollLimit()
     this.cacheSections()
     this.addEvents()
+    
+    if (options.preload) this.preload()
 
     this.state.initialised = true
     this.state.stopped = false
@@ -66,6 +72,10 @@ export default class {
 
     store.body.style.overflow = 'hidden'
     store.body.classList.add('is-virtual-scroll')
+  }
+
+  preload() {
+    preload(this.el).then(this.resize)
   }
 
   setScrollLimit() {
@@ -283,6 +293,7 @@ export default class {
     this.setScrollLimit()
 
     if (this.scrollbar) this.scrollbar.update()
+    if (options.preload) this.preload()
   }
 
   removeEvents() {

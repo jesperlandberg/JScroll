@@ -1,6 +1,5 @@
 .DS_Store
 .cache
 node_modules
-dist
 yarn.lock
 index.html
