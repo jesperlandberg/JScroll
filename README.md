@@ -69,3 +69,7 @@ JScroll.init({ // Options are optional })
 
 `getScroll`: Returns scroll value
 
+## References
+
+Some great examples of sites using JScroll.
+
