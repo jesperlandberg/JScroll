@@ -11,7 +11,7 @@ Smooth scrolling sections based on <a href="http://www.everyday3d.com/blog/index
 ```Javascript
 import JScroll from '@twotwentytwo/jscroll'
 
-JScroll.init({ // Options is optional })
+JScroll.init({ // Options are optional })
 ```
 ###### Markup
 ```HTML
@@ -32,7 +32,7 @@ JScroll.init({ // Options is optional })
 
 `scrollbar`: Virtual scrollbar (defaults to `false`)
 
-`disableMobile`: Disable JScroll from mobil devices (defaults to `true`)
+`disableMobile`: Disable JScroll on mobilee devices (defaults to `true`)
 
 `vs`:
   - `mouseMultiplier`: Defaults to 0.45
