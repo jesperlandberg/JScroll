@@ -34,6 +34,8 @@ JScroll.init({ // Options are optional })
 
 `disableMobile`: Disable JScroll on mobilee devices (defaults to `true`)
 
+`preload`: Trigger resize after loading all images (defaults to `false`)
+
 `vs`:
   - `mouseMultiplier`: Defaults to 0.45
   - `touchMultiplier`: Defaults to 2.5
