@@ -8,7 +8,7 @@ import {
   preload 
 } from '../utils'
 
-import { options } from './options'
+import options from './options'
 import Scrollbar from './Scrollbar'
 
 export default class {

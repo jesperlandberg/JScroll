@@ -5,6 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack --mode development --watch",
+    "build": "webpack --mode production",
     "clean": "rm -rf dist/*"
   },
   "author": "Jesper Landberg",
@@ -18,7 +20,11 @@
     "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-proposal-private-methods": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "babel-loader": "^8.0.6",
     "cssnano": "^4.1.10",
-    "sass": "^1.22.12"
+    "sass": "^1.22.12",
+    "webpack": "^5.0.0-beta.7",
+    "webpack-cli": "^3.3.10"
   }
 }
