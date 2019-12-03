@@ -18,7 +18,7 @@ JScroll.init({ // Options are optional })
 <div data-smooth> <!-- Add data-smooth to ur containeer -->
   <div data-smooth-item></div>
   <div data-smooth-item></div>
-  <div data-smooth-item></div>
+  <div data-smooth-item data-speed="1.1"></div> <!-- Use data-speed to control speed of item -->
   <div>
     <div>
       <div data-smooth-item></div> <!-- No need to be top lvl -->
