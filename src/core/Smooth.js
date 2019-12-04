@@ -89,13 +89,24 @@ export default class {
 
     for (let i = 0; i < this.elems.length; i++) {
       const el = this.elems[i]
-      const { speed, top, bottom, offset } = this.getVars(el)
+      const speed = el.dataset.speed || 1
+      const { top, bottom, offset } = this.getVars(el, speed)
+
+      let parent = el.parentNode.closest('[data-smooth-item]')
+      if (parent) {
+        this.sections.some(obj => {
+          if (obj.el === parent) {
+            parent = obj
+          }
+        })
+      }
 
       this.sections.push({
-        el,
+        el, parent,
         top, bottom,
         offset, speed,
-        out: true,          
+        out: true,
+        transform: 0
       })
 
       el.style.transform = 'translate3d(0, 0, 0)'
@@ -110,7 +121,7 @@ export default class {
 
       section.el.style.transform = 'translate3d(0, 0, 0)'
       
-      const { top, bottom, offset } = this.getVars(section.el)
+      const { top, bottom, offset } = this.getVars(section.el, section.speed)
 
       Object.assign(section, {
         top, bottom,
@@ -121,15 +132,15 @@ export default class {
     this.transformSections()
   }
 
-  getVars(el) {
+  getVars(el, speed) {
     const { wh } = this.state
-    const speed = el.dataset.speed || 1
-    const { top, bottom, height } = el.getBoundingClientRect()
-    const centering = (wh / 2) - (height / 2)
-    const offset = top < wh ? 0 : ((top - centering) * speed) - (top - centering)
+    const rect = el.getBoundingClientRect()
+    const centering = (wh / 2) - (rect.height / 2)
+    const offset = rect.top < wh ? 0 : ((rect.top - centering) * speed) - (rect.top - centering)
+    const top = rect.top + offset
+    const bottom = rect.bottom + offset
 
     return {
-      speed,
       top, bottom,
       offset
     }
@@ -183,7 +194,7 @@ export default class {
     this.state.stopped = true
   }
   
-  start() {
+  resume() {
     this.state.stopped = false
   }
 
@@ -211,11 +222,9 @@ export default class {
         transform 
       } = this.isVisible(top, bottom, offset, speed)
 
-      if (isVisible || this.state.resizing) {
-        section.out = false
-        el.style.transform = this.translate(transform)
-      } else if (!section.out) {
-        section.out = true
+      if (isVisible || this.state.resizing || !section.out) {
+        section.out = section.out ? true : false
+        section.transform = transform
         el.style.transform = this.translate(transform)
       }
     }
@@ -228,15 +237,16 @@ export default class {
   isVisible(
     top, bottom,
     offset = 0,
-    speed = 1
+    speed = 1,
+    parent
   ) {
     const { currentRounded, wh } = this.state
-    const threshold = options.threshold
-    const translate = currentRounded * speed
+    const extra = (parent && parent.transform) || 0
+    const translate = currentRounded * speed - extra
     const transform = translate - offset
-    const start = (top + offset) - translate
-    const end = (bottom + offset) - translate
-    const isVisible = start < (threshold + wh) && end > -threshold
+    const start = top - translate - extra
+    const end = bottom - translate - extra
+    const isVisible = start < (this.threshold + wh) && end > -this.threshold
 
     return {
       isVisible,

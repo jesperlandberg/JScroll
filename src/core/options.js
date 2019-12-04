@@ -4,6 +4,7 @@ export default {
   preload: false,
   threshold: 100,
   disableMobile: true,
+  raf: true,
   vs: {
     mouseMultiplier: 0.45,
     touchMultiplier: 2.5,
