@@ -211,21 +211,14 @@ export default class {
       const section = this.sections[i]
 
       const { 
-        el, 
-        top, bottom, 
-        offset, 
-        speed 
-      } = section
-
-      const { 
         isVisible, 
         transform 
-      } = this.isVisible(top, bottom, offset, speed)
+      } = this.isVisible(section)
 
       if (isVisible || this.state.resizing || !section.out) {
         section.out = section.out ? true : false
         section.transform = transform
-        el.style.transform = this.translate(transform)
+        section.el.style.transform = this.translate(transform)
       }
     }
   }
@@ -234,12 +227,11 @@ export default class {
     return `translate3d(0, ${-transform}px, 0)`
   }
 
-  isVisible(
+  isVisible({
     top, bottom,
-    offset = 0,
-    speed = 1,
+    offset, speed,
     parent
-  ) {
+  }) {
     const { currentRounded, wh } = this.state
     const extra = (parent && parent.transform) || 0
     const translate = currentRounded * speed
