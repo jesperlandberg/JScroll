@@ -53,6 +53,8 @@ JScroll.init({ /* Options are optional */ })
 
 `preload()`: Preload images
 
+`tick()`: Where the magic happens
+
 `stop()`: Stop scrolling
 
 `resume()`: Resume scrolling
