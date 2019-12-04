@@ -24,6 +24,9 @@ JScroll.init({ /* Options are optional */ })
       <div data-smooth-item></div> <!-- No need to be top lvl -->
     </div>
   </div>
+  <div data-smooth-item>
+    <div data-smooth-item data-speed="0.75"></div> <!-- Can be nested for parallax effects -->
+  </div>
 </div>
 ```
 
