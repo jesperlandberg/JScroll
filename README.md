@@ -11,11 +11,11 @@ Smooth scrolling sections based on <a href="http://www.everyday3d.com/blog/index
 ```Javascript
 import JScroll from '@twotwentytwo/jscroll'
 
-JScroll.init({ // Options are optional })
+JScroll.init({ /* Options are optional */ })
 ```
 ###### Markup
 ```HTML
-<div data-smooth> <!-- Add data-smooth to ur containeer -->
+<div data-smooth> <!-- Add data-smooth to your container -->
   <div data-smooth-item></div>
   <div data-smooth-item></div>
   <div data-smooth-item data-speed="1.1"></div> <!-- Use data-speed to control speed of item -->
@@ -23,6 +23,9 @@ JScroll.init({ // Options are optional })
     <div>
       <div data-smooth-item></div> <!-- No need to be top lvl -->
     </div>
+  </div>
+  <div data-smooth-item>
+    <div data-smooth-item data-speed="0.75"></div> <!-- Can be nested for parallax effects -->
   </div>
 </div>
 ```
@@ -50,6 +53,8 @@ JScroll.init({ // Options are optional })
 
 `preload()`: Preload images
 
+`tick()`: Where the magic happens
+
 `stop()`: Stop scrolling
 
 `resume()`: Resume scrolling
@@ -60,9 +65,9 @@ JScroll.init({ // Options are optional })
 
 ## Events
 
-`on('tick', ({ target, current })`: Raf callback. Scroll and lerped scroll params.
+`on('tick', ({ target, current }) => {})`: Raf callback. Scroll and lerped scroll params.
 
-`on('scroll', ({ delta, target })`: Scroll callback. Delta and scroll params.
+`on('scroll', ({ delta, target }) => {})`: Scroll callback. Delta and scroll params.
 
 ## Getters
 `getSmooth`: Returns lerped scroll value
