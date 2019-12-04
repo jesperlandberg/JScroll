@@ -242,10 +242,10 @@ export default class {
   ) {
     const { currentRounded, wh } = this.state
     const extra = (parent && parent.transform) || 0
-    const translate = currentRounded * speed - extra
-    const transform = translate - offset
-    const start = top - translate - extra
-    const end = bottom - translate - extra
+    const translate = currentRounded * speed
+    const transform = translate - offset - extra
+    const start = top - translate
+    const end = bottom - translate
     const isVisible = start < (this.threshold + wh) && end > -this.threshold
 
     return {
