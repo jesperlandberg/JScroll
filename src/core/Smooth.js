@@ -34,6 +34,7 @@ export default class {
 
     const {
       el, elems,
+      threshold,
       vs,
       disableMobile
     } = options
@@ -42,6 +43,7 @@ export default class {
 
     this.el = el || document.querySelector('[data-smooth]')
     this.elems = elems || document.querySelectorAll('[data-smooth-item]')
+    this.threshold = threshold;
 
     // Initalise Virtual Scroll
     this.vs = new VirtualScroll({
